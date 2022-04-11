@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+export CARGO_HOME=$ASDF_INSTALL_PATH
+export RUSTUP_HOME=$ASDF_INSTALL_PATH
