@@ -1,34 +1,78 @@
 #!/usr/bin/env bash
 
-script_dir=$(dirname "${BASH_SOURCE[0]}")
-# shellcheck source=/dev/null
-. "$script_dir/exec-env"
+install_rust_analyzer() {
+  local install_type=$1
+  local version=$2
+  local install_path=$3
 
-install_rust() {
-    curl --fail --silent --show-error https://sh.rustup.rs \
-    | sh -s -- -y --no-modify-path --default-toolchain "$ASDF_INSTALL_VERSION"
+  if [ -n "$ASDF_DOWNLOAD_PATH" ]; then
+    [ ! -d "$ASDF_DOWNLOAD_PATH" ] && mkdir -p "$ASDF_DOWNLOAD_PATH"
+    local tmp_download_dir="$ASDF_DOWNLOAD_PATH"
+  elif [ -z "$TMPDIR" ]; then
+    local tmp_download_dir=$(mktemp -d -t rust_build_XXXXXXX)
+  else
+    local tmp_download_dir=$TMPDIR
+  fi
+
+  if [ "$install_type" = "version" ]; then
+    install_elixir_version $version $install_path $tmp_download_dir
+  else
+    echo "asdf-rust-analyzer supports release installs only"
+  fi
 }
 
-install_default_cargo_crates() {
-  local default_cargo_crates="${ASDF_CRATE_DEFAULT_PACKAGES_FILE:=$HOME}/.default-cargo-crates"
 
-  if [ ! -f $default_cargo_crates ]; then return; fi
+install_elixir_version() {
+  local version=$1
+  local install_path=$2
+  local tmp_download_dir=$3
 
-  cat "$default_cargo_crates" | while read -r line; do
-    name=$(echo "$line" | 
-      sed 's|\(.*\) //.*$|\1|' |  # handle comments after crate name
-      sed -E 's|^[[:space:]]*//.*||') # handle full line comments
+  # path to the tar file
+  local source_path="$tmp_download_dir/rust-analyzer-precompiled-${version}.tar.gz"
+  download_zip_file_for_version $version $source_path
 
-    if [ -z $name ]; then continue ; fi
-    echo -ne "\nInstalling \033[33m${name}\033[39m cargo crate... "
-    PATH="$ASDF_INSTALL_PATH/bin:$PATH" cargo install $name > /dev/null && rc=$? || rc=$?
-    if [[ $rc -eq 0 ]]; then
-      echo -e "\033[32mSUCCESS\033[39m"
-    else
-      echo -e "\033[31mFAIL\033[39m"
-    fi
-  done
+  echo "==> Copying release into place"
+
+  if ! type "tar" &> /dev/null; then
+    echo "ERROR: tar not found"
+    exit 1
+  fi
+
+  tar -xzf $source_path -C $install_path || exit 1
 }
 
-install_rust
-install_default_cargo_crates
+download_zip_file_for_version() {
+  local version=$1
+  local download_path=$2
+  local download_url=$(get_download_url_for_version $version)
+
+  # determine if the file exists
+  echo "==> Checking whether specified Elixir release exists..."
+  http_status=$(curl -I -w %{http_code} -s -o /dev/null $download_url)
+
+  if [ $http_status -eq 404 ] || [ $http_status -eq 403 ]; then
+    cat <<EOS
+==> Rust Analyzer version not found
+
+Github returned a ${http_status} for the following URL:
+
+${download_url}
+
+You can view a list of all rust-analyzer releases by running 'asdf list-all rust-analyzer'.
+EOS
+
+    exit 1 # non zero due to file not existing
+  fi
+
+  echo "==> Downloading ${version} to ${download_path}"
+  curl -Lo $download_path -C - $download_url
+}
+
+get_download_url_for_version() {
+  local version=$1
+
+  echo "https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-x86_64-unknown-linux-musl.gz"
+}
+
+
+install_elixir $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
