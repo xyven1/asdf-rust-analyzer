@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-releases_path=https://api.github.com/repos/rust-lang/rust/tags
+releases_path=https://api.github.com/repos/rust-analyzer/rust-analyzer/tags
 
 cmd="curl -s"
 
