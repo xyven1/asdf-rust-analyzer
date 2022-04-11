@@ -4,7 +4,7 @@ install_rust_analyzer() {
   local install_type=$1
   local version=$2
   local install_path=$3
-
+  
   if [ -n "$ASDF_DOWNLOAD_PATH" ]; then
     [ ! -d "$ASDF_DOWNLOAD_PATH" ] && mkdir -p "$ASDF_DOWNLOAD_PATH"
     local tmp_download_dir="$ASDF_DOWNLOAD_PATH"
@@ -15,14 +15,14 @@ install_rust_analyzer() {
   fi
 
   if [ "$install_type" = "version" ]; then
-    install_elixir_version $version $install_path $tmp_download_dir
+    install_rust_analyzer_version $version $install_path $tmp_download_dir
   else
     echo "asdf-rust-analyzer supports release installs only"
   fi
 }
 
 
-install_elixir_version() {
+install_rust_analyzer_version() {
   local version=$1
   local install_path=$2
   local tmp_download_dir=$3
@@ -37,8 +37,8 @@ install_elixir_version() {
     echo "ERROR: tar not found"
     exit 1
   fi
-
-  tar -xzf $source_path -C $install_path || exit 1
+  local install_path_bin = "$install_path/bin"
+  tar -xzf $source_path -C $install_path_bin || exit 1
 }
 
 download_zip_file_for_version() {
