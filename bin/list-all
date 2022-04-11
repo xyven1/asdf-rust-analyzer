@@ -12,5 +12,5 @@ fi
 cmd="$cmd $releases_path"
 
 # Fetch all tag names, and get only second column. Then remove all unnecesary characters.
-versions=$(eval $cmd | sed -n 's/.*"name": "\([0-9\.]*\)",/\1/p' | sed -n '1!G;h;$p')
-echo nightly beta stable $versions
+versions=$(eval $cmd | sed -n 's/.*"name": "\([0-9\-]*\)",/\1/p' | sed -n '1!G;h;$p')
+echo nightly $versions
