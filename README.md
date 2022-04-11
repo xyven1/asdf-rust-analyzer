@@ -1,4 +1,4 @@
-# asdf-rust
+# asdf-rust-analyzer
 
 [![Build Status](https://travis-ci.org/code-lever/asdf-rust.svg?branch=master)](https://travis-ci.org/code-lever/asdf-rust)
 
