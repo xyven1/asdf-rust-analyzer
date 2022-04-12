@@ -42,7 +42,7 @@ install_rust_analyzer() {
     echo "$source_path"
     echo "∗ Downloading..."
     curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download rust $version"
-    mkdir -p "$install_path/bin/rust-analyzer"
+    mkdir -p "$install_path/bin"
     gzip -c "$source_path" | cat "$install_path/bin/rust-analyzer" || fail "Could not uncompress"
 
     rm -rf "$tmp_download_dir"
