@@ -40,6 +40,7 @@ install_rust_analyzer() {
   (
     echo "$install_path"
     echo "$source_path"
+    echo "$download_url"
     echo "∗ Downloading..."
     curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download rust $version"
     mkdir -p "$install_path/bin"
