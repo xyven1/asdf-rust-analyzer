@@ -32,7 +32,7 @@ install_rust_analyzer() {
     *) fail "Unsupported architecture" ;;
   esac
 
-  local download_url="https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-${architechture}-${platform}.gz"
+  local download_url="https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-${architecture}-${platform}.gz"
   local tmp_download_dir
   tmp_download_dir=$(mktemp -d -t rust_analyzer_tmp_XXXXXX)
   local source_path="${tmp_download_dir}/rust-analyzer.gz"
