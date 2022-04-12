@@ -32,7 +32,7 @@ install_rust_analyzer() {
     *) fail "Unsupported architecture" ;;
   esac
 
-  local download_url="https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-${architechture}-${platform}.tar.gz"
+  local download_url="https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-${architechture}-${platform}.gz"
   local tmp_download_dir
   tmp_download_dir=$(mktemp -d -t rust_analyzer_tmp_XXXXXX)
   local source_path="${tmp_download_dir}/rust-analyzer.tar.gz"
@@ -42,7 +42,7 @@ install_rust_analyzer() {
     echo "∗ Downloading..."
     curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download rust $version"
     mkdir -p "$distination_path/bin"
-    tar zxf "$source_path" -C "$distination_path/bin" --strip-components=1 || fail "Could not uncompress"
+    gzip -c "$source_path" > cat "$distination_path/bin" || fail "Could not uncompress"
 
     rm -rf "$tmp_download_dir"
 
