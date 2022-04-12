@@ -37,7 +37,7 @@ install_rust_analyzer_version() {
     echo "ERROR: tar not found"
     exit 1
   fi
-  local install_path_bin = "$install_path/bin"
+  local install_path_bin="$install_path/bin"
   tar -xzf $source_path -C $install_path_bin || exit 1
 }
 
