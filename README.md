@@ -1,13 +1,15 @@
 # asdf-rust-analyzer
 
-rust-analyzer plugin for [asdf](https://github.com/asdf-vm/asdf) version manager.
+![Status](https://github.com/Xyven1/asdf-rust-analyzer/workflows/plugin%20test/badge.svg)
+
+[rust-analyzer plugin](https://github.com/rust-analyzer/rust-analyzer) for [asdf](https://github.com/asdf-vm/asdf) version manager.
 
 ## Install
 
 ```
-asdf plugin-add rust-analyzer https://github.com/code-lever/asdf-rust-analyzer.git
+asdf plugin-add rust-analyzer https://github.com/Xyven1/asdf-rust-analyze.git
 ```
 
 ## Use
 
-Check [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of rust-analyzer.
+Check out the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of rust-analyzer.
