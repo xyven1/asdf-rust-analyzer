@@ -1,78 +1,56 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
+
+fail() {
+  echo -e "\e[31mFail:\e[m $*"
+  exit 1
+}
 
 install_rust_analyzer() {
   local install_type=$1
   local version=$2
   local install_path=$3
-  
-  if [ -n "$ASDF_DOWNLOAD_PATH" ]; then
-    [ ! -d "$ASDF_DOWNLOAD_PATH" ] && mkdir -p "$ASDF_DOWNLOAD_PATH"
-    local tmp_download_dir="$ASDF_DOWNLOAD_PATH"
-  elif [ -z "$TMPDIR" ]; then
-    local tmp_download_dir=$(mktemp -d -t rust_build_XXXXXXX)
-  else
-    local tmp_download_dir=$TMPDIR
+
+  if [ "$install_type" != "version" ]; then
+    fail "asdf-rust-analyzer supports release installs only"
   fi
 
-  if [ "$install_type" = "version" ]; then
-    install_rust_analyzer_version $version $install_path $tmp_download_dir
-  else
-    echo "asdf-rust-analyzer supports release installs only"
-  fi
+  local platform
+
+  case "$OSTYPE" in
+    darwin*) platform="apple-darwin" ;;
+    linux*) platform="unknown-linux-gnu" ;;
+    *) fail "Unsupported platform" ;;
+  esac
+
+  local architecture
+
+  case "$(uname -m)" in
+    x86_64 | x86-64 | x64 | amd64) architecture="x86_64" ;;
+    aarch64 | arm64) architecture="aarch64" ;;
+    *) fail "Unsupported architecture" ;;
+  esac
+
+  local download_url="https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-${architechture}-${platform}.tar.gz"
+  local tmp_download_dir
+  tmp_download_dir=$(mktemp -d -t rust_analyzer_tmp_XXXXXX)
+  local source_path="${tmp_download_dir}/rust-analyzer.tar.gz"
+  local distination_path="${tmp_download_dir}/dist"
+
+  (
+    echo "∗ Downloading..."
+    curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download rust $version"
+    mkdir -p "$distination_path/bin"
+    tar zxf "$source_path" -C "$distination_path/bin" --strip-components=1 || fail "Could not uncompress"
+
+    rm -rf "$tmp_download_dir"
+
+    echo "Downloading was successful!"
+  ) || (
+    rm -rf "$install_path"
+    fail "An error occurred"
+  )
 }
 
-
-install_rust_analyzer_version() {
-  local version=$1
-  local install_path=$2
-  local tmp_download_dir=$3
-
-  # path to the tar file
-  local source_path="$tmp_download_dir/rust-analyzer-precompiled-${version}.tar.gz"
-  download_zip_file_for_version $version $source_path
-
-  echo "==> Copying release into place"
-
-  if ! type "tar" &> /dev/null; then
-    echo "ERROR: tar not found"
-    exit 1
-  fi
-  local install_path_bin="$install_path/bin"
-  tar -xzf $source_path -C $install_path_bin || exit 1
-}
-
-download_zip_file_for_version() {
-  local version=$1
-  local download_path=$2
-  local download_url=$(get_download_url_for_version $version)
-
-  # determine if the file exists
-  echo "==> Checking whether specified Elixir release exists..."
-  http_status=$(curl -I -w %{http_code} -s -o /dev/null $download_url)
-
-  if [ $http_status -eq 404 ] || [ $http_status -eq 403 ]; then
-    cat <<EOS
-==> Rust Analyzer version not found
-
-Github returned a ${http_status} for the following URL:
-
-${download_url}
-
-You can view a list of all rust-analyzer releases by running 'asdf list-all rust-analyzer'.
-EOS
-
-    exit 1 # non zero due to file not existing
-  fi
-
-  echo "==> Downloading ${version} to ${download_path}"
-  curl -Lo $download_path -C - $download_url
-}
-
-get_download_url_for_version() {
-  local version=$1
-
-  echo "https://github.com/rust-analyzer/rust-analyzer/releases/download/${version}/rust-analyzer-x86_64-unknown-linux-musl.gz"
-}
-
-
-install_rust_analyzer $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_rust_analyzer "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
