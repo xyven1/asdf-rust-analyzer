@@ -7,7 +7,7 @@
 ## Install
 
 ```
-asdf plugin-add rust-analyzer https://github.com/Xyven1/asdf-rust-analyze.git
+asdf plugin-add rust-analyzer https://github.com/Xyven1/asdf-rust-analyzer.git
 ```
 
 ## Use
